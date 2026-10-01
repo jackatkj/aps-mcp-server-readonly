@@ -1,0 +1,12 @@
+{
+  "projects": [
+    {
+      "name": "Example Project One",
+      "number": "1234567.00",
+      "aliases": ["example one", "ex1"],
+      "accountId": "b.YOUR-ACCOUNT-GUID",
+      "projectId": "b.YOUR-PROJECT-GUID",
+      "description": "Short description the model can use to disambiguate."
+    }
+  ]
+}

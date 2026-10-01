@@ -1,27 +1,23 @@
+import { defineTool, loadConfig } from "../guardrails.js";
 import { dataManagementClient } from "../utils.js";
 
-export const getProjectsTool = {
+export const getProjectsTool = defineTool({
+    name: "get_projects",
     title: "Get Accounts & Projects",
     description: `
-        Retrieves all Autodesk Construction Cloud (ACC) accounts and their associated projects accessible to the configured service account.
-        Returns a structured list of accounts (with account IDs and names) and associated projects (with project IDs and names).
+        Lists the approved Forma projects with their Autodesk IDs. Only allowlisted projects are returned,
+        even if the service account can technically see more. Prefer get_project_context unless IDs are needed.
     `,
-    inputSchema: {},
-    callback: async () => {
-        const accounts = await dataManagementClient.getHubs().then(res => res.data || []);
-        for (const account of accounts) {
-            account.projects = await dataManagementClient.getHubProjects(account.id).then(res => res.data || []);
+    handler: async () => {
+        const { projects } = loadConfig();
+        const hubs = await dataManagementClient.getHubs().then(r => r.data || []);
+        const approvedIds = new Set(projects.map(p => p.projectId));
+        const out = [];
+        for (const hub of hubs) {
+            const all = await dataManagementClient.getHubProjects(hub.id).then(r => r.data || []);
+            const mine = all.filter(p => approvedIds.has(p.id));
+            if (mine.length) out.push({ id: hub.id, name: hub.attributes.name, projects: mine.map(p => ({ id: p.id, name: p.attributes.name })) });
         }
-        const result = {
-            accounts: accounts.map(a => ({
-                id: a.id,
-                name: a.attributes.name,
-                projects: (a.projects || []).map(p => ({ id: p.id, name: p.attributes.name }))
-            }))
-        };
-        return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
-            structuredContent: result
-        };
+        return { accounts: out };
     }
-};
+});

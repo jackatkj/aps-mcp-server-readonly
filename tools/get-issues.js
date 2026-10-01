@@ -1,23 +1,18 @@
-import { z } from "zod";
+import { defineTool, resolveProject, cap, stripB } from "../guardrails.js";
 import { issuesClient } from "../utils.js";
+import { z } from "zod";
 
-export const getIssuesTool = {
+// Optional: KJ does not use Issues yet. Enable with ENABLE_ISSUES=true.
+export const getIssuesTool = defineTool({
+    name: "get_issues",
     title: "Get Issues",
-    description: `
-        Retrieves all issues within an Autodesk Construction Cloud (ACC) project. Requires a projectId parameter.
-        Returns the list of issues with their IDs, titles, statuses, and issue type IDs.
-    `,
-    inputSchema: {
-        projectId: z.string().nonempty()
-    },
-    callback: async ({ projectId }) => {
-        const issues = await issuesClient.getIssues(projectId.replace("b.", "")).then(res => res.results || []);
-        const result = {
-            issues: issues.map(issue => ({ id: issue.id, title: issue.title, status: issue.status }))
-        };
-        return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
-            structuredContent: result
-        };
+    optional: true,
+    description: `Lists issues (id, title, status) in an approved Forma project. Read-only. Capped and flagged if truncated.`,
+    inputSchema: { project: z.string().describe("Project name or number") },
+    handler: async ({ project }) => {
+        const p = resolveProject(project);
+        const issues = await issuesClient.getIssues(stripB(p.projectId)).then(r => r.results || []);
+        const c = cap(issues.map(i => ({ id: i.id, title: i.title, status: i.status })));
+        return { project: p.name, issues: c.items, total: c.total, truncated: c.truncated };
     }
-};
+});

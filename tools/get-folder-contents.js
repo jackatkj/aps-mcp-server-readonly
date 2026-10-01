@@ -1,28 +1,22 @@
 import { z } from "zod";
+import { defineTool, resolveProject, cap } from "../guardrails.js";
 import { dataManagementClient } from "../utils.js";
 
-export const getFolderContentsTool = {
+export const getFolderContentsTool = defineTool({
+    name: "get_folder_contents",
     title: "Get Folder Contents",
     description: `
-        Retrieves the contents of a folder within an Autodesk Construction Cloud (ACC) project.
-        Requires accountId and projectId parameters. If no folderId is provided, returns the top-level folders of the project.
-        Returns the list of folders and files with their IDs and names.
+        Lists folders and files in an approved Forma project. Give the project by name or number.
+        Omit folderId to list the top-level folders; pass a folder ID from an earlier result to go deeper.
+        Results are capped and flagged if truncated.
     `,
-    inputSchema: {
-        accountId: z.string().nonempty(),
-        projectId: z.string().nonempty(),
-        folderId: z.string().optional()
-    },
-    callback: async ({ accountId, projectId, folderId }) => {
-        const contents = folderId
-            ? await dataManagementClient.getFolderContents(projectId, folderId).then(res => res.data || [])
-            : await dataManagementClient.getProjectTopFolders(accountId, projectId).then(res => res.data || []);
-        const result = {
-            contents: contents.map(item => ({ id: item.id, type: item.type, name: item.attributes.displayName }))
-        };
-        return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
-            structuredContent: result
-        };
+    inputSchema: { project: z.string().describe("Project name or number"), folderId: z.string().optional() },
+    handler: async ({ project, folderId }) => {
+        const p = resolveProject(project);
+        const data = folderId
+            ? await dataManagementClient.getFolderContents(p.projectId, folderId).then(r => r.data || [])
+            : await dataManagementClient.getProjectTopFolders(p.accountId, p.projectId).then(r => r.data || []);
+        const c = cap(data.map(i => ({ id: i.id, type: i.type, name: i.attributes.displayName })));
+        return { project: p.name, contents: c.items, total: c.total, truncated: c.truncated };
     }
-};
+});

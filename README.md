@@ -126,3 +126,12 @@ SSA_KEY_PATH="/Users/brozp/aps-mcp-server-nodejs/8a4ee790-3378-44f3-bbab-5acb35e
 ```
 
 > For more details on how to add MCP servers to Cursor, see the [documentation](https://docs.cursor.com/context/model-context-protocol)
+
+## KJ read-only guardrails (added)
+
+- Copy `projects.config.example.json` to `projects.config.json` (git-ignored) and list the approved projects. Every tool resolves a project **name or number** against this allowlist; anything else is refused with a "ask the user" hint.
+- Read-only by construction: GET-only helper with a path allowlist (`aps.js`), GraphQL mutations rejected, no write tools, SSA scope `data:read`. `npm test` fails if write-like calls appear.
+- Tools: `preview_design` (Autodesk Viewer; note it hands the viewer a short-lived read token), `get_project_context` (start here), `get_projects`, `get_folder_contents`, `search_project_files`, `get_file_versions`, `aec_list_element_groups`, `aec_query_elements`, `aec_get_families`; `get_issues` / `get_issue_types` only when `ENABLE_ISSUES=true`.
+- Results are capped (`MAX_ROWS`, default 100) and flagged `truncated`. Calls are logged to `logs/audit.log` (arguments only, no tokens).
+- Edit `guidelines.md` to change the working rules served to Claude (instructions, resource and tool output).
+- AEC Data Model queries are drafted from documentation and are **untested**; verify field names in the AEC GraphiQL explorer.

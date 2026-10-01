@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { resolveProject, audit, ToolError } from "../guardrails.js";
+
 import {
     getItemTip,
     serviceAccountAuthenticationProvider
@@ -9,6 +11,9 @@ const VIEWER_RESOURCE_URI =
     "ui://aps-mcp/viewer.html";
 
 const previewDesignTool = {
+
+    name:
+        "preview_design",
 
     title:
         "Preview design",
@@ -20,7 +25,7 @@ const previewDesignTool = {
 
         projectId:
             z.string().describe(
-                "Project ID the design belongs to."
+                "Project name or number (must be an approved project)."
             ),
 
         designId:
@@ -51,11 +56,22 @@ const previewDesignTool = {
 
     },
 
-    callback: async ({
-        projectId,
-        designId,
-        region = "US"
-    }) => {
+    callback: async (args) => {
+        try {
+            return await previewDesign(args);
+        } catch (err) {
+            audit({ tool: "preview_design", args, ok: false, error: String(err.message).slice(0, 300) });
+            const hint = err instanceof ToolError ? err.hint : "Report this to the user plainly. Do not retry in a loop.";
+            return { isError: true, content: [{ type: "text", text: JSON.stringify({ error: err instanceof ToolError ? err.message : "The Autodesk request failed.", nextStep: hint }) }] };
+        }
+    }
+
+};
+
+async function previewDesign({ projectId: projectQuery, designId, region = "US" }) {
+        const project = resolveProject(projectQuery);
+        const projectId = project.projectId;
+        audit({ tool: "preview_design", args: { project: project.name, designId, region }, ok: true });
 
         // ---------------------------------------------------------------------
         // Get the current APS access token using the existing SSA provider.
@@ -128,8 +144,6 @@ const previewDesignTool = {
 
         };
 
-    }
-
-};
+}
 
 export default previewDesignTool;

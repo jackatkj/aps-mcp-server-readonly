@@ -1,27 +1,16 @@
-import { z } from "zod";
+import { defineTool, resolveProject, stripB } from "../guardrails.js";
 import { issuesClient } from "../utils.js";
+import { z } from "zod";
 
-export const getIssueTypesTool = {
+export const getIssueTypesTool = defineTool({
+    name: "get_issue_types",
     title: "Get Issue Types",
-    description: `
-        Retrieves all configured issue types available in an Autodesk Construction Cloud (ACC) project.
-        Requires a projectId parameter. Returns the list of issue types with their IDs, titles, and subtypes.
-    `,
-    inputSchema: {
-        projectId: z.string().nonempty()
-    },
-    callback: async ({ projectId }) => {
-        const issueTypes = await issuesClient.getIssuesTypes(projectId.replace("b.", ""), { include: "subtypes" }).then(res => res.results || []);
-        const result = {
-            issueTypes: issueTypes.map(t => ({
-                id: t.id,
-                title: t.title,
-                subtypes: (t.subtypes || []).map(s => ({ id: s.id, title: s.title }))
-            }))
-        };
-        return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
-            structuredContent: result
-        };
+    optional: true,
+    description: `Lists configured issue types and subtypes for an approved Forma project. Read-only.`,
+    inputSchema: { project: z.string().describe("Project name or number") },
+    handler: async ({ project }) => {
+        const p = resolveProject(project);
+        const types = await issuesClient.getIssuesTypes(stripB(p.projectId), { include: "subtypes" }).then(r => r.results || []);
+        return { project: p.name, issueTypes: types.map(t => ({ id: t.id, title: t.title, subtypes: (t.subtypes || []).map(s => ({ id: s.id, title: s.title })) })) };
     }
-};
+});

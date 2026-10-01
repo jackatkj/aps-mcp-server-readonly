@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "type": "module",
   "private": true,
+  "scripts": { "test": "node --test test/readonly.test.js" },
   "description": "Simple Model Context Protocol server built with Node.js, providing access to Autodesk Platform Services API, with fine-grained access control using Secure Service Accounts.",
   "author": "Petr Broz <petr.broz@autodesk.com>",
   "dependencies": {
