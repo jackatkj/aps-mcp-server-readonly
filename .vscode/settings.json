@@ -1,0 +1,12 @@
+{
+  "files.exclude": {
+    "**/.env": true,
+    "**/.env.*": true,
+    "**/*.pem": true
+  },
+  "search.exclude": {
+    "**/.env": true,
+    "**/.env.*": true,
+    "**/*.pem": true
+  }
+}

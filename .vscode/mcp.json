@@ -1,11 +1,12 @@
 {
-	"servers": {
-		"aps-mcp-server-nodejs": {
-			"type": "stdio",
-			"command": "node",
-			"args": [
-				"server.js"
-			]
-		}
-	}
+    "servers": {
+        "aps": {
+            "type": "stdio",
+            "command": "node",
+            "args": [
+                "${workspaceFolder}/server.js"
+            ],
+            "cwd": "${workspaceFolder}"
+        }
+    }
 }
