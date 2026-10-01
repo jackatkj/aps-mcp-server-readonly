@@ -3,7 +3,7 @@ import { ToolError } from "./guardrails.js";
 import { serviceAccountAuthenticationProvider } from "./utils.js";
 
 const BASE = "https://developer.api.autodesk.com";
-const ALLOWED_GET_PREFIXES = ["/data/v1/", "/project/v1/", "/construction/issues/v1/"];
+const ALLOWED_GET_PREFIXES = ["/data/v1/", "/project/v1/", "/construction/issues/v1/", "/modelderivative/v2/designdata/"];
 
 export function assertReadOnlyPath(p) {
     if (!ALLOWED_GET_PREFIXES.some(x => p.startsWith(x)) || p.includes("..")) {

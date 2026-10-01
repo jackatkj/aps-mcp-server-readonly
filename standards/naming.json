@@ -1,0 +1,21 @@
+{
+  "_readme": "EXAMPLE rules. Replace with KJ's real standards, then run `npm test`. Each rule: id, description, appliesTo (optional folder-name regex), pattern (regex on the file name), example. A file passes if it matches ANY rule whose appliesTo matches its folder.",
+  "version": 1,
+  "disciplineCodes": { "C": "Civil", "S": "Structural", "M": "Mechanical", "E": "Electrical", "P": "Plumbing", "G": "General" },
+  "rules": [
+    {
+      "id": "drawing",
+      "description": "Drawings: <ProjectNumber>-<Discipline>-<Sheet>_<Description>.<ext>",
+      "appliesTo": "(?i)plans|drawings|sheets",
+      "pattern": "^\\d{7}\\.\\d{2}-[CSMEPG]-\\d{3}[A-Za-z0-9_ -]*\\.(dwg|pdf|rvt)$",
+      "example": "1234567.00-C-101_Grading Plan.dwg"
+    },
+    {
+      "id": "spec",
+      "description": "Specs: <ProjectNumber>-SPEC-<Division>_<Description>.pdf",
+      "appliesTo": "(?i)spec",
+      "pattern": "^\\d{7}\\.\\d{2}-SPEC-\\d{2}[A-Za-z0-9_ -]*\\.(pdf|docx)$",
+      "example": "1234567.00-SPEC-03_Concrete.pdf"
+    }
+  ]
+}

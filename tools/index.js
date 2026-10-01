@@ -10,3 +10,7 @@ export { aecQueryElementsTool } from "./aec-query-elements.js";
 export { aecGetFamiliesTool } from "./aec-get-families.js";
 export { getIssuesTool } from "./get-issues.js";
 export { getIssueTypesTool } from "./get-issue-types.js";
+export { getStandardsTool } from "./get-standards.js";
+export { checkFileNamingTool } from "./check-file-naming.js";
+export { aecCheckRequiredParametersTool } from "./aec-check-required-parameters.js";
+export { getFilePropertiesTool } from "./get-file-properties.js";

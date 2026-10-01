@@ -5,6 +5,7 @@ import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import * as tools from "./tools/index.js";
+import { loadNaming, loadRequiredParams } from "./standards.js";
 
 const dir = path.dirname(url.fileURLToPath(import.meta.url));
 const guidelines = fs.readFileSync(path.join(dir, "guidelines.md"), "utf-8");
@@ -21,6 +22,8 @@ export function buildServer() {
     }
     server.registerResource("guidelines", "kj://guidelines", { title: "KJ working rules", mimeType: "text/markdown" },
         async uri => ({ contents: [{ uri: uri.href, mimeType: "text/markdown", text: guidelines }] }));
+    server.registerResource("standards", "kj://standards", { title: "KJ naming and parameter standards", mimeType: "application/json" },
+        async uri => ({ contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify({ naming: loadNaming(), requiredParameters: loadRequiredParams() }, null, 2) }] }));
     server.registerPrompt("project_status", {
         title: "Project status summary",
         description: "Summarize what is in a project and what changed recently.",

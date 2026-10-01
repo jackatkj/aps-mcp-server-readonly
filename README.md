@@ -134,4 +134,5 @@ SSA_KEY_PATH="/Users/brozp/aps-mcp-server-nodejs/8a4ee790-3378-44f3-bbab-5acb35e
 - Tools: `preview_design` (Autodesk Viewer; note it hands the viewer a short-lived read token), `get_project_context` (start here), `get_projects`, `get_folder_contents`, `search_project_files`, `get_file_versions`, `aec_list_element_groups`, `aec_query_elements`, `aec_get_families`; `get_issues` / `get_issue_types` only when `ENABLE_ISSUES=true`.
 - Results are capped (`MAX_ROWS`, default 100) and flagged `truncated`. Calls are logged to `logs/audit.log` (arguments only, no tokens).
 - Edit `guidelines.md` to change the working rules served to Claude (instructions, resource and tool output).
+- KJ standards live in `standards/*.json` (naming rules, required Revit parameters). Served by `get_standards` and `kj://standards`, and used by `check_file_naming` and `aec_check_required_parameters`. Replace the example rules with real ones.
 - AEC Data Model queries are drafted from documentation and are **untested**; verify field names in the AEC GraphiQL explorer.

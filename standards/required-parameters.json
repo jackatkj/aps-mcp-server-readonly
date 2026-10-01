@@ -1,0 +1,6 @@
+{
+  "_readme": "EXAMPLE. Category -> parameters that must have a value in published Revit models.",
+  "Doors": ["Mark", "Fire Rating"],
+  "Rooms": ["Number", "Name", "Department"],
+  "Walls": ["Fire Rating"]
+}

@@ -55,10 +55,17 @@ test("server registers expected tools, hides issues by default, and returns guid
     const client = new Client({ name: "t", version: "0" });
     await client.connect(b);
     const names = (await client.listTools()).tools.map(t => t.name).sort();
-    assert.deepEqual(names, ["aec_get_families", "aec_list_element_groups", "aec_query_elements", "get_file_versions", "get_folder_contents", "get_project_context", "get_projects", "preview_design", "search_project_files"]);
+    assert.deepEqual(names, ["aec_check_required_parameters", "aec_get_families", "aec_list_element_groups", "aec_query_elements", "check_file_naming", "get_file_properties", "get_file_versions", "get_folder_contents", "get_project_context", "get_projects", "get_standards", "preview_design", "search_project_files"]);
     const bad = await client.callTool({ name: "get_folder_contents", arguments: { project: "nope" } });
     assert.equal(bad.isError, true);
     assert.match(bad.content[0].text, /not an approved project/);
     const ctx = await client.callTool({ name: "get_project_context", arguments: {} });
     assert.equal(ctx.structuredContent.readOnly, true);
+});
+
+test("naming checker", async () => {
+    const { checkName } = await import("../standards.js");
+    assert.equal(checkName("1234567.00-C-101_Grading Plan.dwg", "Plans").status, "pass");
+    assert.equal(checkName("final_v2 (copy).dwg", "Plans").status, "fail");
+    assert.equal(checkName("anything.txt", "Photos").status, "no-rule");
 });
