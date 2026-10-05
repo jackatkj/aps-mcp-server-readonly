@@ -6,7 +6,7 @@ import path from "node:path";
 import { setConfigForTests, resolveProject, cap } from "../guardrails.js";
 
 process.env.APS_CLIENT_ID = process.env.APS_CLIENT_ID || "x";
-setConfigForTests({ projects: [
+setConfigForTests({ projectNumberPattern: "\\d{3}\\.\\d{2}", projects: [
     { name: "Alpha Plant", number: "100.01", aliases: ["alpha"], accountId: "b.A", projectId: "b.P1" },
     { name: "Alpha Pipeline", number: "200.02", aliases: [], accountId: "b.A", projectId: "b.P2" }
 ] });
@@ -41,6 +41,13 @@ test("project resolution", () => {
     assert.throws(() => resolveProject(""), /No project/);
 });
 
+test("project number extraction from messy text", async () => {
+    const { extractProjectNumbers } = await import("../guardrails.js");
+    assert.equal(resolveProject("Z_100.01 Alpha folder").name, "Alpha Plant");
+    assert.equal(resolveProject("https://x/y/100.01-C-101.dwg").name, "Alpha Plant");
+    assert.deepEqual(extractProjectNumbers("see 200.02 and 100.01"), ["200.02", "100.01"]);
+});
+
 test("cap flags truncation", () => {
     const c = cap(Array.from({ length: 150 }, (_, i) => i), 100);
     assert.equal(c.items.length, 100); assert.equal(c.truncated, true);
@@ -55,7 +62,7 @@ test("server registers expected tools, hides issues by default, and returns guid
     const client = new Client({ name: "t", version: "0" });
     await client.connect(b);
     const names = (await client.listTools()).tools.map(t => t.name).sort();
-    assert.deepEqual(names, ["aec_check_required_parameters", "aec_get_families", "aec_list_element_groups", "aec_query_elements", "check_file_naming", "get_file_properties", "get_file_versions", "get_folder_contents", "get_project_context", "get_projects", "get_standards", "preview_design", "search_project_files"]);
+    assert.deepEqual(names, ["aec_check_required_parameters", "aec_get_families", "aec_list_element_groups", "aec_query_elements", "check_file_naming", "get_file_properties", "get_file_versions", "get_folder_contents", "get_project_context", "get_projects", "get_standards", "preview_design", "resolve_project", "search_project_files"]);
     const bad = await client.callTool({ name: "get_folder_contents", arguments: { project: "nope" } });
     assert.equal(bad.isError, true);
     assert.match(bad.content[0].text, /not an approved project/);

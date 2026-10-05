@@ -14,3 +14,4 @@ export { getStandardsTool } from "./get-standards.js";
 export { checkFileNamingTool } from "./check-file-naming.js";
 export { aecCheckRequiredParametersTool } from "./aec-check-required-parameters.js";
 export { getFilePropertiesTool } from "./get-file-properties.js";
+export { resolveProjectTool } from "./resolve-project.js";

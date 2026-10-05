@@ -31,9 +31,19 @@ export function setConfigForTests(cfg) { _config = cfg; }
 const norm = s => String(s ?? "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 export const stripB = id => String(id).replace(/^b\./, "");
 
-/** Resolve a user-supplied name / number / alias / id to an allowlisted project. */
+const DEFAULT_NUMBER_PATTERN = "\\d{6,8}(?:[.\\-]\\d{1,2})?";
+const digits = s => String(s ?? "").replace(/\D+/g, "");
+
+/** Pull candidate project numbers out of free text (folder names, URLs, file names, sentences). */
+export function extractProjectNumbers(text, cfg = loadConfig()) {
+    const re = new RegExp(cfg.projectNumberPattern || DEFAULT_NUMBER_PATTERN, "g");
+    return [...new Set(String(text ?? "").match(re) || [])];
+}
+
+/** Resolve a user-supplied name / number / text containing a number / id to an allowlisted project. */
 export function resolveProject(query) {
-    const { projects } = loadConfig();
+    const cfg = loadConfig();
+    const { projects } = cfg;
     if (!query || !String(query).trim()) {
         throw new ToolError("No project was specified.",
             "Ask the user which project they mean. Call get_project_context to list the approved projects.");
@@ -41,6 +51,17 @@ export function resolveProject(query) {
     const q = norm(query);
     const keys = p => [p.name, p.number, p.projectId, stripB(p.projectId), ...(p.aliases || [])].map(norm).filter(Boolean);
     let hits = projects.filter(p => keys(p).includes(q));
+    // Project number found anywhere in the text (e.g. a folder name or URL). "1234567" also matches "1234567.00".
+    if (!hits.length) {
+        const nums = extractProjectNumbers(query, cfg).map(digits).filter(Boolean);
+        if (nums.length) {
+            hits = projects.filter(p => p.number && nums.some(n => digits(p.number) === n || digits(p.number).startsWith(n)));
+            if (!hits.length) {
+                throw new ToolError(`Project number ${extractProjectNumbers(query, cfg).join(", ")} is not an approved project.`,
+                    "Tell the user this server can only see approved projects. Do not guess another project.");
+            }
+        }
+    }
     if (!hits.length) hits = projects.filter(p => keys(p).some(k => k.includes(q) || q.includes(k)));
     if (hits.length === 1) return hits[0];
     const list = (hits.length ? hits : projects).map(p => `${p.name}${p.number ? ` (${p.number})` : ""}`);
