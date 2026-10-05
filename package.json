@@ -3,15 +3,20 @@
   "version": "0.0.1",
   "type": "module",
   "private": true,
-  "scripts": { "test": "node --test test/readonly.test.js", "audit": "npm audit --omit=dev" },
+  "scripts": {
+    "test": "node --test test/readonly.test.js test/sql.test.js",
+    "audit": "npm audit --omit=dev"
+  },
   "description": "Simple Model Context Protocol server built with Node.js, providing access to Autodesk Platform Services API, with fine-grained access control using Secure Service Accounts.",
   "author": "Petr Broz <petr.broz@autodesk.com>",
   "dependencies": {
     "@aps_sdk/construction-issues": "^1.1.0",
     "@aps_sdk/data-management": "^1.1.2",
+    "@azure/identity": "4.13.3",
     "@modelcontextprotocol/sdk": "^1.20.0",
     "dotenv": "^17.4.2",
     "jsonwebtoken": "^9.0.2",
+    "mssql": "12.7.4",
     "zod": "^3.24.2"
   }
 }

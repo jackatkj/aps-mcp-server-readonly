@@ -12,7 +12,7 @@ setConfigForTests({ projectNumberPattern: "\\d{3}\\.\\d{2}", projects: [
 ] });
 
 test("no write calls anywhere in source", () => {
-    const files = ["aps.js", "server.js", "utils.js", ...fs.readdirSync("tools").map(f => path.join("tools", f))];
+    const files = ["aps.js", "server.js", "utils.js", ...fs.readdirSync("tools").map(f => path.join("tools", f)), ...fs.readdirSync("sql").filter(f => f.endsWith(".js")).map(f => path.join("sql", f))];
     const bad = /\.(put|patch|delete|create\w*|update\w*|post)\(|method:\s*["'](PUT|PATCH|DELETE)["']/;
     for (const f of files) assert.ok(!bad.test(fs.readFileSync(f, "utf-8")), `write-like call in ${f}`);
     // the single allowed POST is the AEC GraphQL read query

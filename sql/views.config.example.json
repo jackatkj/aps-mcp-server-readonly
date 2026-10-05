@@ -1,0 +1,12 @@
+{
+  "_readme": "Allowlist of views the SQL MCP may read. Copy to sql/views.config.json (git-ignored). Only schema 'mcp' is allowed. projectColumn is the column holding the project number. Only listed columns can be selected or filtered.",
+  "schema": "mcp",
+  "views": {
+    "ProjectSummary": {
+      "description": "One row per project: status, dates, manager (example, replace).",
+      "projectColumn": "ProjectNumber",
+      "columns": ["ProjectNumber", "ProjectName", "Status", "StartDate", "EndDate", "Manager"],
+      "filterableColumns": ["Status"]
+    }
+  }
+}

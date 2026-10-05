@@ -5,3 +5,4 @@ Thumbs.db
 *.env
 *.pemprojects.config.json
 logs/
+sql/views.config.json

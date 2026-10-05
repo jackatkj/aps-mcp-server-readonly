@@ -136,3 +136,13 @@ SSA_KEY_PATH="/Users/brozp/aps-mcp-server-nodejs/8a4ee790-3378-44f3-bbab-5acb35e
 - Edit `guidelines.md` to change the working rules served to Claude (instructions, resource and tool output).
 - KJ standards live in `standards/*.json` (naming rules, required Revit parameters). Served by `get_standards` and `kj://standards`, and used by `check_file_naming` and `aec_check_required_parameters`. Replace the example rules with real ones.
 - AEC Data Model queries are drafted from documentation and are **untested**; verify field names in the AEC GraphiQL explorer.
+
+## SQL MCP (read-only scaffold)
+
+A second, separate server for Azure SQL project data: `node sql/server.js`.
+
+- Tools: `sql_list_views`, `sql_query_project_view`. There is no raw-SQL path: queries are built from an allowlist of views and columns (`sql/views.config.json`, copy from the `.example`), always parameterized and always restricted to one resolved project.
+- Auth: Microsoft Entra (`azure-active-directory-default`: `az login`, VS Code sign-in, or a managed identity later). No password is stored. Put `SQL_SERVER` and `SQL_DATABASE` in `~/.aps-secrets/sql-mcp.env`.
+- Ask IT for a login limited to `SELECT` on schema `mcp` (views only). See the setup notes in the project docs.
+- Register in Claude Desktop alongside the Forma server, e.g. `"kj-sql-readonly": { "command": "node", "args": ["C:/path/sql/server.js"] }`.
+- `npm test` runs offline with a fake database.
